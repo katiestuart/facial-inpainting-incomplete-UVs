@@ -1,0 +1,17 @@
+NOTES: no notes
+root: /srv/datasets/Places2
+mask_root: ./masks
+save_dir: ./snapshots/default
+log_dir: ./logs/default
+lr: 0.0002
+lr_finetune: 5e-05
+max_iter: 20000
+batch_size: 32
+n_threads: 16
+save_model_interval: 100000
+vis_interval: 1000
+log_interval: 100
+image_size: 128
+resume: snapshots/default/ckpt/15000.pth
+finetune: False
+gpu: True
