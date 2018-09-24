@@ -1,8 +1,9 @@
 from __future__ import print_function
 
-
+# from tqdm import tqdm
 import torch
 import torch as nn
+# import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils import data
@@ -66,13 +67,22 @@ else:
 
 parser = argparse.ArgumentParser()
 # training options
+# parser.add_argument('--NOTES', type=str,default='no notes')
+# parser.add_argument('--root', type=str, default='/srv/datasets/Places2')
+# parser.add_argument('--mask_root', type=str, default='./masks')
 parser.add_argument('--save_dir', type=str, default='./snapshots/default')
+# parser.add_argument('--log_dir', type=str, default='./logs/default')
 parser.add_argument('--lr', type=float, default=1e-3)
+# parser.add_argument('--lr_finetune', type=float, default=1e-4)
 parser.add_argument('--max_iter', type=int, default=10000)
 parser.add_argument('--batch_size', type=int, default=32)
 parser.add_argument('--n_threads', type=int, default=16)
 parser.add_argument('--save_model_interval', type=int, default=100)
 parser.add_argument('--vis_interval', type=int, default=100)
+# parser.add_argument('--log_interval', type=int, default=1000)
+# parser.add_argument('--image_size', type=int, default=128)
+# parser.add_argument('--resume', type=str)
+# parser.add_argument('--finetune', action='store_true')
 parser.add_argument('--gpu', type=str,default=True)
 args = parser.parse_args()
 
@@ -118,7 +128,7 @@ class cnn_blend(nn.Module):
         x = self.relu(x)
         return x
 
-# Alternate approach
+#Alternative Approach
 # class cnn_blend(nn.Module):
 #     def __init__(self):
 #         super(cnn_blend, self).__init__()
@@ -238,14 +248,14 @@ def evaluate(model, img_name):
             gt_mask = custom_replace(gt, 0, 1)
 
             with torch.no_grad():
-                output = cnn(gt, pca_img)
+                output = cnn(pconv_img, pca_img)
                 loss = weighted_mse_loss(output, gt, Variable(gt_mask))
                 test_loss += loss.data[0]
 
             if counter>1:
                 # print('>1 -----------')
                 gt_concat = torch.cat((gt_concat, gt.data))
-                output_concat = torch.cat((output_concat, output_concat.data))
+                output_concat = torch.cat((output_concat, output.data))
                 pca_img_concat = torch.cat((pca_img_concat, pca_img.data))
                 pconv_img_concat = torch.cat((pconv_img_concat, pconv_img.data))
                 label_concat = label_concat +[label[0]]
@@ -264,7 +274,7 @@ def evaluate(model, img_name):
     test_loss=float(test_loss)
 
     grid = make_grid(
-    torch.cat((gt_concat, pca_img_concat,pconv_img_concat,output_concat ), dim=0))
+    torch.cat((gt_concat, pca_img_concat,pconv_img_concat,output_concat ), dim=0)) #image_concat  --do we need this?
     save_image(grid, project_path+''+img_name)
     print('EVAL COMPLETE')
 
@@ -276,6 +286,8 @@ def evaluate(model, img_name):
     return test_loss
 
 
+
+#### CHANGE THIS NOW!
 device = torch.device('cuda')
 # set up dirs
 if not os.path.exists(args.save_dir):
@@ -317,7 +329,7 @@ def run_style_transfer(model, test_filename='file_name_here',learning_rate = 1e-
 
                 # pred_concat = pca_img+gt
 
-                output = model(gt, pca_img)
+                output = model(pconv_img, pca_img)
 
                 loss = weighted_mse_loss(output, gt, Variable(gt_mask))
 
@@ -347,6 +359,9 @@ def run_style_transfer(model, test_filename='file_name_here',learning_rate = 1e-
             if num%args.vis_interval==0:
                 print('Saving Epoch',epoch,project_path+'models/'+test_filename+'/output_imgs_'+str(num)+'/' )
                 save_path2 = project_path+'models/'+test_filename+'/output_imgs_'+str(num)+'/'
+                print('path define')
+
+                # save_image(imgs_to_save, project_path+'models/'+test_filename+'/loss'+str(num)+'_plt.png')
                 print('image saved')
                 a_plot = two_plots(train_losses, 'train_losses', test_losses , 'test_losses', 'epoch',
                                    title = 'Test loss vs Train loss',
