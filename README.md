@@ -35,4 +35,4 @@ https://github.com/eriklindernoren/PyTorch-GAN/blob/master/implementations/conte
 
 <br/><br/>
 ### Author
-kastuart9@gmail.com. Please reach out with any suggestions, questions or comments.
+kastuart9@gmail.com. Please reach out with any suggestions, questions or comments
