@@ -67,7 +67,7 @@ csv = data_path+'image_names_test_train_sample.csv'
 
 
 ################################
-# MODEL PREP
+## MODEL PREP
 ################################
 
 def two_plots(p1_data, p1y_label, p2_data, p2y_label, x_label, title, save_name, show_plot=True):
